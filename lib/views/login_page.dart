@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import 'registro_page.dart';
+import 'esqueceu_senha_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -94,7 +95,14 @@ class _LoginPageState extends State<LoginPage> {
                   ),
 
             TextButton(
-              onPressed: _recuperarSenha, // Requisito de recuperação de senha
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const EsqueceuSenhaPage(),
+                  ),
+                );
+              },
               child: const Text("Esqueci minha senha"),
             ),
             TextButton(
