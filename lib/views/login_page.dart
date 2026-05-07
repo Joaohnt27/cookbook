@@ -1,3 +1,5 @@
+import 'package:cookbook/views/home_page.dart';
+import 'package:cookbook/views/navigation_wrapper.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import 'registro_page.dart';
@@ -27,8 +29,10 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _carregando = false);
 
     if (erro == null) {
-      // Navegar para Home (falta criar!!!)
-      print("Login com sucesso!");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const NavigationWrapper()),
+      );
     } else {
       // Feedback de erro
       ScaffoldMessenger.of(context).showSnackBar(

@@ -93,7 +93,6 @@ class _RegistroPageState extends State<RegistroPage> {
                   border: OutlineInputBorder(),
                 ),
                 obscureText: true,
-                // Validação de senha exigida no RF002
                 validator: (val) {
                   if (val!.length < 6) return "Mínimo 6 caracteres";
                   if (!val.contains(RegExp(r'[A-Z]')))
