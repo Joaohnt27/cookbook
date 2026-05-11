@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../models/receita_model.dart'; 
+import '../models/receita_model.dart';
 
 class NovaReceitaPage extends StatefulWidget {
   final Receita? receitaParaEdicao;
@@ -14,15 +14,15 @@ class NovaReceitaPage extends StatefulWidget {
 
 class _NovaReceitaPageState extends State<NovaReceitaPage> {
   final _formKey = GlobalKey<FormState>();
-
-  // Controllers late para inicialização no initState
   late TextEditingController _nomeController;
   late TextEditingController _ingredientesController;
   late TextEditingController _preparoController;
   late TextEditingController _tempoController;
   String _categoriaSelecionada = 'Almoço';
-
   bool _carregando = false;
+
+  final Color _primaryColor = const Color(0xFFE67E22);
+  final Color _secondaryColor = const Color(0xFF34495E);
 
   @override
   void initState() {
@@ -47,6 +47,18 @@ class _NovaReceitaPageState extends State<NovaReceitaPage> {
     }
   }
 
+  InputDecoration _inputStyle(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, color: _primaryColor),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide(color: _primaryColor, width: 2),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _nomeController.dispose();
@@ -62,7 +74,6 @@ class _NovaReceitaPageState extends State<NovaReceitaPage> {
 
       try {
         final user = FirebaseAuth.instance.currentUser;
-
         final Map<String, dynamic> dadosReceita = {
           'nome': _nomeController.text,
           'ingredientes': _ingredientesController.text,
@@ -89,20 +100,21 @@ class _NovaReceitaPageState extends State<NovaReceitaPage> {
             SnackBar(
               content: Text(
                 widget.receitaParaEdicao == null
-                    ? "Receita criada com sucesso!"
+                    ? "Sua nova receita foi salva! 👨‍🍳"
                     : "Receita atualizada com sucesso!",
               ),
               backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
             ),
           );
           Navigator.pop(context);
         }
       } catch (e) {
-        // Feedback de erro para o usuário
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Erro ao processar: $e"),
-            backgroundColor: Colors.red,
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       } finally {
@@ -118,18 +130,27 @@ class _NovaReceitaPageState extends State<NovaReceitaPage> {
         : "Editar Receita";
 
     return Scaffold(
-      appBar: AppBar(title: Text(titulo)),
+      backgroundColor: const Color(0xFFFDFBFA),
+      appBar: AppBar(
+        title: Text(
+          titulo,
+          style: TextStyle(color: _secondaryColor, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: IconThemeData(color: _primaryColor),
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(24.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
               TextFormField(
                 controller: _nomeController,
-                decoration: const InputDecoration(
-                  labelText: "Nome da Receita",
-                  border: OutlineInputBorder(),
+                decoration: _inputStyle(
+                  "Nome da Receita",
+                  Icons.restaurant_menu,
                 ),
                 validator: (val) => val!.isEmpty ? "Informe o nome" : null,
               ),
@@ -137,10 +158,7 @@ class _NovaReceitaPageState extends State<NovaReceitaPage> {
               TextFormField(
                 controller: _ingredientesController,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: "Ingredientes",
-                  border: OutlineInputBorder(),
-                ),
+                decoration: _inputStyle("Ingredientes", Icons.list_alt),
                 validator: (val) =>
                     val!.isEmpty ? "Informe os ingredientes" : null,
               ),
@@ -148,9 +166,9 @@ class _NovaReceitaPageState extends State<NovaReceitaPage> {
               TextFormField(
                 controller: _preparoController,
                 maxLines: 4,
-                decoration: const InputDecoration(
-                  labelText: "Modo de Preparo",
-                  border: OutlineInputBorder(),
+                decoration: _inputStyle(
+                  "Modo de Preparo",
+                  Icons.description_outlined,
                 ),
                 validator: (val) => val!.isEmpty ? "Informe o preparo" : null,
               ),
@@ -160,9 +178,9 @@ class _NovaReceitaPageState extends State<NovaReceitaPage> {
                   Expanded(
                     child: TextFormField(
                       controller: _tempoController,
-                      decoration: const InputDecoration(
-                        labelText: "Tempo (min)",
-                        border: OutlineInputBorder(),
+                      decoration: _inputStyle(
+                        "Tempo (min)",
+                        Icons.timer_outlined,
                       ),
                       keyboardType: TextInputType.number,
                       validator: (val) => val!.isEmpty ? "Obrigatório" : null,
@@ -171,14 +189,24 @@ class _NovaReceitaPageState extends State<NovaReceitaPage> {
                   const SizedBox(width: 15),
                   Expanded(
                     child: DropdownButtonFormField<String>(
+                      isExpanded: true,
                       value: _categoriaSelecionada,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
                         labelText: "Categoria",
+                        prefixIcon: Icon(
+                          Icons.category_outlined,
+                          color: _primaryColor,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
                       ),
                       items: ['Almoço', 'Jantar', 'Sobremesa', 'Lanche']
                           .map(
-                            (c) => DropdownMenuItem(value: c, child: Text(c)),
+                            (c) => DropdownMenuItem(
+                              value: c,
+                              child: Text(c, overflow: TextOverflow.ellipsis),
+                            ),
                           )
                           .toList(),
                       onChanged: (val) =>
@@ -187,21 +215,26 @@ class _NovaReceitaPageState extends State<NovaReceitaPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 40),
               _carregando
-                  ? const CircularProgressIndicator()
+                  ? CircularProgressIndicator(color: _primaryColor)
                   : ElevatedButton(
                       onPressed: _processarDados,
                       style: ElevatedButton.styleFrom(
+                        backgroundColor: _primaryColor,
+                        foregroundColor: Colors.white,
                         minimumSize: const Size(double.infinity, 55),
-                        backgroundColor: Colors.orange,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        elevation: 2,
                       ),
                       child: Text(
                         widget.receitaParaEdicao == null
                             ? "SALVAR RECEITA"
                             : "ATUALIZAR RECEITA",
                         style: const TextStyle(
-                          color: Colors.white,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
