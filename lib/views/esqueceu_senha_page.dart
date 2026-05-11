@@ -16,28 +16,41 @@ class _EsqueceuSenhaPageState extends State<EsqueceuSenhaPage> {
   void _recuperar() async {
     if (_emailController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Por favor, informe seu e-mail.")),
+        const SnackBar(
+          content: Text("Por favor, informe seu e-mail."),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       return;
     }
 
     setState(() => _carregando = true);
 
-    String? erro = await _authService.recuperarSenha(_emailController.text);
+    String? erro = await _authService.recuperarSenha(
+      _emailController.text.trim(),
+    );
 
     setState(() => _carregando = false);
 
     if (erro == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Link de recuperação enviado para o seu e-mail!"),
+          content: Text(
+            "👨‍🍳 Link de recuperação enviado! Verifique seu e-mail.",
+          ),
           backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
         ),
       );
-      Navigator.pop(context); // Volta para a tela de login
+      Navigator.pop(context);
     } else {
+      // Feedback informativo de erro [cite: 43]
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(erro), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text(erro),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }
@@ -45,38 +58,102 @@ class _EsqueceuSenhaPageState extends State<EsqueceuSenhaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Recuperar Senha")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              "Insira seu e-mail para receber um link de redefinição de senha.",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: "E-mail",
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.email),
+      backgroundColor: const Color(0xFFFDFBFA),
+      appBar: AppBar(
+        title: const Text(
+          "Recuperar Senha",
+          style: TextStyle(color: Color(0xFF34495E)),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Color(0xFFE67E22)),
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.lock_reset_rounded,
+                size: 100,
+                color: Color(0xFFE67E22),
               ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 20),
-            _carregando
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: _recuperar,
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50),
-                    ),
-                    child: const Text("Enviar E-mail"),
+              const SizedBox(height: 20),
+              const Text(
+                "Esqueceu sua senha?",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF34495E),
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "Insira seu e-mail abaixo para receber as instruções de recuperação.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+              const SizedBox(height: 40),
+
+              TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: "E-mail cadastrado",
+                  prefixIcon: const Icon(
+                    Icons.email_outlined,
+                    color: Color(0xFFE67E22),
                   ),
-          ],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFE67E22),
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+
+              _carregando
+                  ? const CircularProgressIndicator(color: Color(0xFFE67E22))
+                  : ElevatedButton(
+                      onPressed: _recuperar,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE67E22),
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 55),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        elevation: 2,
+                      ),
+                      child: const Text(
+                        "ENVIAR INSTRUÇÕES",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+
+              const SizedBox(height: 20),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  "Voltar para o Login",
+                  style: TextStyle(
+                    color: Color(0xFF34495E),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

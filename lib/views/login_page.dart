@@ -1,4 +1,3 @@
-import 'package:cookbook/views/home_page.dart';
 import 'package:cookbook/views/navigation_wrapper.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
@@ -34,26 +33,12 @@ class _LoginPageState extends State<LoginPage> {
         MaterialPageRoute(builder: (context) => const NavigationWrapper()),
       );
     } else {
-      // Feedback de erro
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(erro), backgroundColor: Colors.red),
-      );
-    }
-  }
-
-  void _recuperarSenha() async {
-    if (_emailController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Digite seu e-mail primeiro.")),
-      );
-      return;
-    }
-
-    String? erro = await _authService.recuperarSenha(_emailController.text);
-
-    if (erro == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("E-mail de recuperação enviado!")),
+        SnackBar(
+          content: Text(erro),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }
@@ -61,64 +46,155 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("CookBook Login")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.restaurant_menu, size: 80, color: Colors.orange),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: "E-mail",
-                border: OutlineInputBorder(),
+      backgroundColor: const Color(0xFFFDFBFA),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.restaurant_menu,
+                  size: 100,
+                  color: Color(0xFFE67E22),
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _senhaController,
-              decoration: const InputDecoration(
-                labelText: "Senha",
-                border: OutlineInputBorder(),
+              const SizedBox(height: 10),
+              const Text(
+                "CookBook",
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF34495E),
+                  letterSpacing: 1.2,
+                ),
               ),
-              obscureText: true,
-            ),
-            const SizedBox(height: 20),
+              const Text(
+                "Suas receitas em um só lugar",
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+              const SizedBox(height: 40),
 
-            // Botão com feedback de progresso
-            _carregando
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: _efetuarLogin,
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 50),
+              // Campo de E-mail
+              TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: "E-mail",
+                  prefixIcon: const Icon(
+                    Icons.email_outlined,
+                    color: Color(0xFFE67E22),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFE67E22),
+                      width: 2,
                     ),
-                    child: const Text("Entrar"),
                   ),
+                ),
+              ),
+              const SizedBox(height: 15),
 
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const EsqueceuSenhaPage(),
+              // Campo de Senha
+              TextField(
+                controller: _senhaController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: "Senha",
+                  prefixIcon: const Icon(
+                    Icons.lock_outline,
+                    color: Color(0xFFE67E22),
                   ),
-                );
-              },
-              child: const Text("Esqueci minha senha"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const RegistroPage()),
-                );
-              },
-              child: const Text("Criar uma conta"),
-            ),
-          ],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFE67E22),
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
+
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const EsqueceuSenhaPage(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    "Esqueceu sua senha?",
+                    style: TextStyle(color: Color(0xFF34495E)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              _carregando
+                  ? const CircularProgressIndicator(color: Color(0xFFE67E22))
+                  : ElevatedButton(
+                      onPressed: _efetuarLogin,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE67E22),
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 55),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        elevation: 2,
+                      ),
+                      child: const Text(
+                        "ENTRAR",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Ainda não tem conta?"),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RegistroPage(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      "Crie uma aqui",
+                      style: TextStyle(
+                        color: Color(0xFFE67E22),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
