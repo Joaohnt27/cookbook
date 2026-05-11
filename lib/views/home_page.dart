@@ -1,3 +1,5 @@
+import 'package:cookbook/views/nova_receita_page.dart';
+import 'package:cookbook/views/pesquisa_receitas_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,6 +16,17 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Minhas Receitas"),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PesquisaReceitasPage(),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () => FirebaseAuth.instance.signOut(),
@@ -51,7 +64,15 @@ class HomePage extends StatelessWidget {
                     "${receita.categoria} • ${receita.tempoPreparo} min",
                   ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            NovaReceitaPage(receitaParaEdicao: receita),
+                      ),
+                    );
+                  },
                 ),
               );
             },
@@ -61,7 +82,10 @@ class HomePage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
-          // Navegar para tela de Inserção
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const NovaReceitaPage()),
+          );
         },
       ),
     );
