@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class ReceitaDetalhesPage extends StatefulWidget {
   final dynamic meal;
-
   const ReceitaDetalhesPage({super.key, required this.meal});
 
   @override
@@ -14,6 +13,8 @@ class ReceitaDetalhesPage extends StatefulWidget {
 
 class _ReceitaDetalhesPageState extends State<ReceitaDetalhesPage> {
   final translator = GoogleTranslator();
+  final Color _primaryColor = const Color(0xFFE67E22);
+  final Color _secondaryColor = const Color(0xFF34495E);
 
   String _nome = "";
   String _categoria = "";
@@ -24,6 +25,21 @@ class _ReceitaDetalhesPageState extends State<ReceitaDetalhesPage> {
   @override
   void initState() {
     super.initState();
+    _inicializarDados();
+  }
+
+  Future<void> _inicializarDados() async {
+    if (widget.meal['strInstructions'] == null ||
+        widget.meal['strInstructions'].isEmpty) {
+      setState(() {
+        _nome = widget.meal['strMeal'] ?? "";
+        _categoria = widget.meal['strCategory'] ?? "";
+        _origem = widget.meal['strArea'] ?? "";
+        _instrucoes = widget.meal['strInstructions'] ?? "Sem modo de preparo.";
+        _estaTraduzindo = false;
+      });
+      return;
+    }
     _traduzirTudo();
   }
 
@@ -72,6 +88,41 @@ class _ReceitaDetalhesPageState extends State<ReceitaDetalhesPage> {
     }
   }
 
+  Future<void> _salvarFavorito() async {
+    final user = FirebaseAuth.instance.currentUser;
+    try {
+      await FirebaseFirestore.instance.collection('favoritos').add({
+        'nome': _nome,
+        'imagem': widget.meal['strMealThumb'],
+        'categoria': _categoria,
+        'origem': _origem,
+        'instrucoes': _instrucoes,
+        'idMeal': widget.meal['idMeal'],
+        'userId': user?.uid,
+        'data_favorito': FieldValue.serverTimestamp(),
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Salvo nos favoritos!"),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Erro ao salvar: $e"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final String receitaId =
@@ -80,18 +131,22 @@ class _ReceitaDetalhesPageState extends State<ReceitaDetalhesPage> {
         'temp_id';
 
     return Scaffold(
+      backgroundColor: const Color(0xFFFDFBFA),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 300,
+            expandedHeight: 320,
             pinned: true,
+            iconTheme: const IconThemeData(color: Colors.white),
+            backgroundColor: _secondaryColor,
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
                 _estaTraduzindo ? "Carregando..." : _nome,
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  shadows: [Shadow(blurRadius: 10, color: Colors.black)],
+                  fontSize: 18,
+                  shadows: [Shadow(blurRadius: 8, color: Colors.black)],
                 ),
               ),
               background: Stack(
@@ -103,7 +158,7 @@ class _ReceitaDetalhesPageState extends State<ReceitaDetalhesPage> {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Colors.black54],
+                        colors: [Colors.transparent, Colors.black87],
                       ),
                     ),
                   ),
@@ -114,41 +169,43 @@ class _ReceitaDetalhesPageState extends State<ReceitaDetalhesPage> {
           SliverList(
             delegate: SliverChildListDelegate([
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Chip(
-                          avatar: const Icon(Icons.restaurant, size: 16),
-                          label: Text(_estaTraduzindo ? "..." : _categoria),
-                        ),
-                        Chip(
-                          avatar: const Icon(Icons.public, size: 16),
-                          label: Text(_estaTraduzindo ? "..." : _origem),
-                          backgroundColor: Colors.orange[100],
-                        ),
+                        _buildInfoChip(Icons.restaurant, _categoria),
+                        const SizedBox(width: 10),
+                        _buildInfoChip(Icons.public, _origem),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    const Row(
+                    const SizedBox(height: 30),
+                    Row(
                       children: [
-                        Icon(Icons.description, color: Colors.orange),
-                        SizedBox(width: 8),
+                        Icon(Icons.menu_book, color: _primaryColor),
+                        const SizedBox(width: 10),
                         Text(
                           "Modo de Preparo",
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
+                            color: _secondaryColor,
                           ),
                         ),
                       ],
                     ),
-                    const Divider(height: 30),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: Divider(),
+                    ),
                     _estaTraduzindo
-                        ? const Center(child: CircularProgressIndicator())
+                        ? const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(20),
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
                         : Text(
                             _instrucoes,
                             textAlign: TextAlign.justify,
@@ -158,12 +215,11 @@ class _ReceitaDetalhesPageState extends State<ReceitaDetalhesPage> {
                               color: Colors.black87,
                             ),
                           ),
-
-                    const Divider(height: 50, thickness: 2),
-
+                    const SizedBox(height: 40),
+                    const Divider(thickness: 1.5),
+                    const SizedBox(height: 20),
                     SecaoAvaliacao(receitaId: receitaId),
-
-                    const SizedBox(height: 100),
+                    const SizedBox(height: 120),
                   ],
                 ),
               ),
@@ -172,38 +228,33 @@ class _ReceitaDetalhesPageState extends State<ReceitaDetalhesPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.orange[700],
-        onPressed: () async {
-          final user = FirebaseAuth.instance.currentUser;
-          try {
-            await FirebaseFirestore.instance.collection('favoritos').add({
-              'nome': _nome,
-              'imagem': widget.meal['strMealThumb'],
-              'categoria': _categoria,
-              'origem': _origem,
-              'userId': user?.uid,
-              'data_favorito': FieldValue.serverTimestamp(),
-            });
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Salvo nos favoritos!"),
-                backgroundColor: Colors.green,
-              ),
-            );
-          } catch (e) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text("Erro ao salvar: $e"),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        },
+        backgroundColor: _primaryColor,
+        onPressed: _salvarFavorito,
         label: const Text(
           "SALVAR RECEITA",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        icon: const Icon(Icons.favorite),
+        icon: const Icon(Icons.favorite, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: _primaryColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: _primaryColor),
+          const SizedBox(width: 6),
+          Text(
+            _estaTraduzindo ? "..." : label,
+            style: TextStyle(color: _primaryColor, fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
     );
   }
@@ -220,55 +271,52 @@ class SecaoAvaliacao extends StatefulWidget {
 class _SecaoAvaliacaoState extends State<SecaoAvaliacao> {
   final _comentarioController = TextEditingController();
   double _nota = 5;
-  final user = FirebaseAuth.instance.currentUser;
+  final Color _primaryColor = const Color(0xFFE67E22);
+  final Color _secondaryColor = const Color(0xFF34495E);
 
   void _enviarAvaliacao() async {
     if (_comentarioController.text.isEmpty) return;
-
     try {
       final user = FirebaseAuth.instance.currentUser;
-
-      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+      final userDoc = await FirebaseFirestore.instance
           .collection('usuarios')
           .doc(user?.uid)
           .get();
-
       final dadosUsuario = userDoc.data() as Map<String, dynamic>?;
-
       final nomeReal = dadosUsuario != null
           ? dadosUsuario['nome']
           : "Cozinheiro";
 
-      final dadosParaSalvar = {
+      await FirebaseFirestore.instance.collection('avaliacoes').add({
         'nota': _nota,
         'comentario': _comentarioController.text,
         'data': FieldValue.serverTimestamp(),
         'userId': user?.uid,
         'userName': nomeReal,
         'receitaId': widget.receitaId,
-      };
-
-      await FirebaseFirestore.instance
-          .collection('avaliacoes')
-          .add(dadosParaSalvar);
+      });
 
       _comentarioController.clear();
       setState(() => _nota = 5);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Avaliação enviada!"),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Avaliação enviada!"),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     } catch (e) {
-      print("Erro detalhado: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Erro ao enviar: $e"),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Erro ao enviar: $e"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -277,49 +325,59 @@ class _SecaoAvaliacaoState extends State<SecaoAvaliacao> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Avaliações e Comentários",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        Text(
+          "Avaliações",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: _secondaryColor,
+          ),
         ),
-        const SizedBox(height: 15),
+        const SizedBox(height: 10),
         Row(
-          mainAxisAlignment: MainAxisAlignment.start,
           children: List.generate(5, (index) {
-            return IconButton(
-              onPressed: () => setState(() => _nota = index + 1.0),
-              icon: Icon(
+            return GestureDetector(
+              onTap: () => setState(() => _nota = index + 1.0),
+              child: Icon(
                 index < _nota ? Icons.star : Icons.star_border,
                 color: Colors.amber,
-                size: 32,
+                size: 35,
               ),
             );
           }),
         ),
+        const SizedBox(height: 15),
         TextField(
           controller: _comentarioController,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: "Escreva sua opinião...",
-            border: OutlineInputBorder(),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15),
+              borderSide: BorderSide(color: _primaryColor, width: 2),
+            ),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         ElevatedButton(
           onPressed: _enviarAvaliacao,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _secondaryColor,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
           child: const Text("Postar Avaliação"),
         ),
-        const SizedBox(height: 20),
-
+        const SizedBox(height: 25),
         StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('avaliacoes')
               .where('receitaId', isEqualTo: widget.receitaId)
               .snapshots(),
           builder: (context, snapshot) {
-            if (snapshot.hasError)
-              return const Text("Erro ao carregar avaliações.");
-            if (snapshot.connectionState == ConnectionState.waiting)
-              return const CircularProgressIndicator();
-
+            if (!snapshot.hasData) return const SizedBox();
             return ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -327,10 +385,25 @@ class _SecaoAvaliacaoState extends State<SecaoAvaliacao> {
               itemBuilder: (context, index) {
                 var doc = snapshot.data!.docs[index];
                 return Card(
-                  margin: const EdgeInsets.only(bottom: 10),
+                  margin: const EdgeInsets.only(bottom: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
                   child: ListTile(
-                    leading: CircleAvatar(child: Text(doc['nota'].toString())),
-                    title: Text(doc['userName']),
+                    leading: CircleAvatar(
+                      backgroundColor: _primaryColor,
+                      child: Text(
+                        doc['nota'].toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      doc['userName'],
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     subtitle: Text(doc['comentario']),
                   ),
                 );

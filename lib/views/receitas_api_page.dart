@@ -15,6 +15,9 @@ class _ReceitasApiPageState extends State<ReceitasApiPage> {
   List<dynamic> _resultados = [];
   bool _carregando = false;
 
+  static const Color _primaryColor = Color(0xFFE67E22);
+  static const Color _secondaryColor = Color(0xFF34495E);
+
   @override
   void initState() {
     super.initState();
@@ -22,12 +25,15 @@ class _ReceitasApiPageState extends State<ReceitasApiPage> {
   }
 
   void _carregarIndicacoes() async {
+    if (!mounted) return;
     setState(() => _carregando = true);
     final resultados = await _apiService.buscarReceitasExternas("a");
-    setState(() {
-      _resultados = resultados;
-      _carregando = false;
-    });
+    if (mounted) {
+      setState(() {
+        _resultados = resultados;
+        _carregando = false;
+      });
+    }
   }
 
   void _pesquisar() async {
@@ -36,108 +42,152 @@ class _ReceitasApiPageState extends State<ReceitasApiPage> {
     final resultados = await _apiService.buscarReceitasExternas(
       _searchController.text,
     );
-    setState(() {
-      _resultados = resultados;
-      _carregando = false;
-    });
+    if (mounted) {
+      setState(() {
+        _resultados = resultados;
+        _carregando = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Explorar Receitas")),
+      backgroundColor: const Color(0xFFFDFBFA),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          "Explorar Receitas",
+          style: TextStyle(color: _secondaryColor, fontWeight: FontWeight.bold),
+        ),
+      ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: _searchController,
+              onSubmitted: (_) => _pesquisar(),
               decoration: InputDecoration(
-                hintText: "Buscar receitas (em inglês)...",
-                prefixIcon: const Icon(Icons.search),
+                hintText: "Buscar no mundo todo...",
+                prefixIcon: const Icon(Icons.public, color: _primaryColor),
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () => _searchController.clear(),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
+                  icon: const Icon(Icons.search),
+                  onPressed: _pesquisar,
+                  color: _primaryColor,
                 ),
                 filled: true,
-                fillColor: Colors.grey[100],
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: const BorderSide(color: _primaryColor, width: 2),
+                ),
               ),
-              onSubmitted: (_) => _pesquisar(),
             ),
           ),
           _carregando
               ? const Expanded(
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(
+                    child: CircularProgressIndicator(color: _primaryColor),
+                  ),
                 )
               : Expanded(
                   child: GridView.builder(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio:
-                              0.75, 
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 0.7,
                         ),
                     itemCount: _resultados.length,
                     itemBuilder: (context, index) {
                       final meal = _resultados[index];
-                      return Card(
-                        clipBehavior: Clip
-                            .antiAlias, 
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        elevation: 3,
-                        child: InkWell(
-                          onTap: () {
-                            print(
-                              "Clicou em: ${meal['strMeal']}",
-                            ); // Debug no console
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    ReceitaDetalhesPage(meal: meal),
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ReceitaDetalhesPage(meal: meal),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
                               ),
-                            );
-                          },
+                            ],
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Expanded(
-                                child: Image.network(
-                                  meal['strMealThumb'],
-                                  fit: BoxFit.cover,
-                                  // Tratamento de erro caso a imagem da API falhe
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(Icons.broken_image, size: 50),
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(20),
+                                  ),
+                                  child: Image.network(
+                                    meal['strMealThumb'] ?? '',
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Icon(
+                                              Icons.broken_image,
+                                              size: 50,
+                                              color: _primaryColor,
+                                            ),
+                                  ),
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.all(10.0),
+                                padding: const EdgeInsets.all(12.0),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      meal['strMeal'] ?? '',
-                                      maxLines: 2,
+                                      meal['strMeal'] ?? 'Sem nome',
+                                      maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
+                                        color: _secondaryColor,
                                         fontSize: 14,
                                       ),
                                     ),
                                     const SizedBox(height: 4),
-                                    Text(
-                                      meal['strCategory'] ?? '',
-                                      style: TextStyle(
-                                        color: Colors.orange[900],
-                                        fontSize: 12,
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: _primaryColor.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Text(
+                                        "Ver Receita",
+                                        style: TextStyle(
+                                          color: _primaryColor,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
                                   ],
