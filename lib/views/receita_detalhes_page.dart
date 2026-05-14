@@ -21,6 +21,7 @@ class _ReceitaDetalhesPageState extends State<ReceitaDetalhesPage> {
   String _origem = "";
   String _instrucoes = "Traduzindo conteúdo...";
   bool _estaTraduzindo = true;
+  String? _idFavoritoExistente;
 
   @override
   void initState() {
@@ -36,11 +37,13 @@ class _ReceitaDetalhesPageState extends State<ReceitaDetalhesPage> {
         _categoria = widget.meal['strCategory'] ?? "";
         _origem = widget.meal['strArea'] ?? "";
         _instrucoes = widget.meal['strInstructions'] ?? "Sem modo de preparo.";
-        _estaTraduzindo = false;
       });
+      await _verificarSeEhFavorito();
       return;
     }
-    _traduzirTudo();
+
+    await _traduzirTudo();
+    await _verificarSeEhFavorito();
   }
 
   Future<void> _traduzirTudo() async {
@@ -88,20 +91,78 @@ class _ReceitaDetalhesPageState extends State<ReceitaDetalhesPage> {
     }
   }
 
-  Future<void> _salvarFavorito() async {
+  Future<void> _verificarSeEhFavorito() async {
     final user = FirebaseAuth.instance.currentUser;
-    try {
-      await FirebaseFirestore.instance.collection('favoritos').add({
-        'nome': _nome,
-        'imagem': widget.meal['strMealThumb'],
-        'categoria': _categoria,
-        'origem': _origem,
-        'instrucoes': _instrucoes,
-        'idMeal': widget.meal['idMeal'],
-        'userId': user?.uid,
-        'data_favorito': FieldValue.serverTimestamp(),
+    final String idBusca =
+        widget.meal['idMeal']?.toString() ??
+        widget.meal['id']?.toString() ??
+        '';
+
+    if (user == null || idBusca.isEmpty) return;
+
+    final query = await FirebaseFirestore.instance
+        .collection('favoritos')
+        .where('userId', isEqualTo: user.uid)
+        .where('idMeal', isEqualTo: idBusca)
+        .get();
+
+    if (query.docs.isNotEmpty && mounted) {
+      setState(() {
+        _idFavoritoExistente = query.docs.first.id;
       });
+    }
+  }
+
+  Future<void> _alternarFavorito() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (_idFavoritoExistente != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('favoritos')
+            .doc(_idFavoritoExistente)
+            .delete();
+
+        if (mounted) {
+          setState(() => _idFavoritoExistente = null);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Removido dos favoritos!"),
+              backgroundColor: Colors.orange,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Erro ao remover: $e"),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+      return;
+    }
+
+    try {
+      final docRef = await FirebaseFirestore.instance
+          .collection('favoritos')
+          .add({
+            'nome': _nome,
+            'imagem': widget.meal['strMealThumb'],
+            'categoria': _categoria,
+            'origem': _origem,
+            'instrucoes': _instrucoes,
+            'idMeal': widget.meal['idMeal'],
+            'userId': user?.uid,
+            'data_favorito': FieldValue.serverTimestamp(),
+          });
+
       if (mounted) {
+        setState(() => _idFavoritoExistente = docRef.id);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Salvo nos favoritos!"),
@@ -228,13 +289,21 @@ class _ReceitaDetalhesPageState extends State<ReceitaDetalhesPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: _primaryColor,
-        onPressed: _salvarFavorito,
-        label: const Text(
-          "SALVAR RECEITA",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        backgroundColor: _idFavoritoExistente != null
+            ? Colors.redAccent
+            : _primaryColor,
+        onPressed: _alternarFavorito,
+        label: Text(
+          _idFavoritoExistente != null ? "REMOVER FAVORITO" : "SALVAR RECEITA",
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
-        icon: const Icon(Icons.favorite, color: Colors.white),
+        icon: Icon(
+          _idFavoritoExistente != null ? Icons.favorite_border : Icons.favorite,
+          color: Colors.white,
+        ),
       ),
     );
   }
