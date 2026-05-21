@@ -1,1 +1,39 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"cookbook-27d6c","appId":"1:705187779457:android:192c982bbdc16179d50e80","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"cookbook-27d6c","configurations":{"android":"1:705187779457:android:192c982bbdc16179d50e80","ios":"1:705187779457:ios:af3d60337f1f223bd50e80","macos":"1:705187779457:ios:af3d60337f1f223bd50e80","web":"1:705187779457:web:9c8b6a821cfd1ea7d50e80","windows":"1:705187779457:web:2dde9aa9f17ed58cd50e80"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "cookbook-27d6c",
+          "appId": "1:705187779457:android:192c982bbdc16179d50e80",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "cookbook-27d6c",
+          "configurations": {
+            "android": "1:705187779457:android:192c982bbdc16179d50e80",
+            "ios": "1:705187779457:ios:af3d60337f1f223bd50e80",
+            "macos": "1:705187779457:ios:af3d60337f1f223bd50e80",
+            "web": "1:705187779457:web:9c8b6a821cfd1ea7d50e80",
+            "windows": "1:705187779457:web:2dde9aa9f17ed58cd50e80"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
