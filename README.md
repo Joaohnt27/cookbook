@@ -2,8 +2,8 @@
 
 Aplicativo Flutter desenvolvido para o projeto prático da disciplina de Mobile II. O CookBook permite que usuários criem uma conta, façam login, salvem suas próprias receitas, pesquisem receitas cadastradas, favoritem receitas externas, avaliem preparos e consumam uma API pública de receitas.
 
-Alunos: 
-Arthur Vital Fontana - 839832
+## Alunos: <br> 
+Arthur Vital Fontana - 839832 <br>
 João Henrique Nazar Tavares - 839463
 
 ## Tema do aplicativo
@@ -166,8 +166,4 @@ Essa integração é usada na tela Explorar Receitas para buscar receitas extern
 
 ## Dados da entrega
 
-- Nome dos alunos: preencher antes da entrega
-- Matrícula: preencher antes da entrega
-- Link do Firebase Hosting: preencher antes da entrega
-- Link do repositório GitHub: preencher antes da entrega
-- Link do vídeo de apresentação: preencher antes da entrega
+- Link do Firebase Hosting: https://cookbook-27d6c.web.app
