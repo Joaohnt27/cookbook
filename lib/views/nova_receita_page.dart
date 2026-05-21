@@ -110,6 +110,7 @@ class _NovaReceitaPageState extends State<NovaReceitaPage> {
           Navigator.pop(context);
         }
       } catch (e) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Erro ao processar: $e"),
@@ -190,7 +191,7 @@ class _NovaReceitaPageState extends State<NovaReceitaPage> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       isExpanded: true,
-                      value: _categoriaSelecionada,
+                      initialValue: _categoriaSelecionada,
                       decoration: InputDecoration(
                         labelText: "Categoria",
                         prefixIcon: Icon(

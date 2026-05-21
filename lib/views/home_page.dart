@@ -136,7 +136,7 @@ class HomePage extends StatelessWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: CircleAvatar(
-          backgroundColor: primaryColor.withOpacity(0.1),
+          backgroundColor: primaryColor.withValues(alpha: 0.1),
           child: Icon(
             isCriada ? Icons.restaurant : Icons.favorite,
             color: primaryColor,

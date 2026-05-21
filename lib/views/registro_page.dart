@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../widgets/telefone_input_formatter.dart';
 
 class RegistroPage extends StatefulWidget {
   const RegistroPage({super.key});
@@ -12,6 +13,7 @@ class _RegistroPageState extends State<RegistroPage> {
   final _formKey = GlobalKey<FormState>();
   final _nomeController = TextEditingController();
   final _telefoneController = TextEditingController();
+  final _cidadeController = TextEditingController();
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
   final _authService = AuthService();
@@ -38,9 +40,11 @@ class _RegistroPageState extends State<RegistroPage> {
         password: _senhaController.text,
         nome: _nomeController.text,
         telefone: _telefoneController.text,
+        cidade: _cidadeController.text,
       );
 
       setState(() => _carregando = false);
+      if (!mounted) return;
 
       if (erro == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -116,8 +120,17 @@ class _RegistroPageState extends State<RegistroPage> {
                     Icons.phone_android_outlined,
                   ),
                   keyboardType: TextInputType.phone,
+                  inputFormatters: [TelefoneInputFormatter()],
                   validator: (val) =>
                       val!.isEmpty ? "Informe seu telefone" : null,
+                ),
+                const SizedBox(height: 15),
+
+                TextFormField(
+                  controller: _cidadeController,
+                  decoration: _inputStyle("Cidade", Icons.location_city),
+                  validator: (val) =>
+                      val!.isEmpty ? "Informe sua cidade" : null,
                 ),
                 const SizedBox(height: 15),
 
@@ -136,8 +149,15 @@ class _RegistroPageState extends State<RegistroPage> {
                   obscureText: true,
                   validator: (val) {
                     if (val!.length < 6) return "Mínimo 6 caracteres";
-                    if (!val.contains(RegExp(r'[A-Z]')))
+                    if (!val.contains(RegExp(r'[A-Z]'))) {
                       return "Deve conter letra maiúscula";
+                    }
+                    if (!val.contains(RegExp(r'[a-z]'))) {
+                      return "Deve conter letra minúscula";
+                    }
+                    if (!val.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+                      return "Deve conter caractere especial";
+                    }
                     return null;
                   },
                 ),

@@ -14,7 +14,6 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
   int _currentIndex = 0;
 
   final Color _primaryColor = const Color(0xFFE67E22);
-  final Color _secondaryColor = const Color(0xFF34495E);
 
   final List<Widget> _pages = [
     const ReceitasApiPage(),
@@ -33,7 +32,7 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),

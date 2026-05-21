@@ -312,7 +312,7 @@ class _ReceitaDetalhesPageState extends State<ReceitaDetalhesPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: _primaryColor.withOpacity(0.1),
+        color: _primaryColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -351,7 +351,7 @@ class _SecaoAvaliacaoState extends State<SecaoAvaliacao> {
           .collection('usuarios')
           .doc(user?.uid)
           .get();
-      final dadosUsuario = userDoc.data() as Map<String, dynamic>?;
+      final dadosUsuario = userDoc.data();
       final nomeReal = dadosUsuario != null
           ? dadosUsuario['nome']
           : "Cozinheiro";

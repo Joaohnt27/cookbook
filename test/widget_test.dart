@@ -1,30 +1,28 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:cookbook/models/receita_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:cookbook/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('Receita.toMap serializa os campos principais', () {
+    final ultimaAtualizacao = DateTime(2026, 5, 21);
+    final receita = Receita(
+      id: 'receita-1',
+      nome: 'Bolo de cenoura',
+      ingredientes: 'cenoura, ovos, farinha',
+      modoPreparo: 'Misture tudo e asse.',
+      tempoPreparo: 45,
+      categoria: 'Sobremesa',
+      userId: 'usuario-1',
+      ultimaAtualizacao: ultimaAtualizacao,
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(receita.toMap(), {
+      'nome': 'Bolo de cenoura',
+      'ingredientes': 'cenoura, ovos, farinha',
+      'modoPreparo': 'Misture tudo e asse.',
+      'tempoPreparo': 45,
+      'categoria': 'Sobremesa',
+      'userId': 'usuario-1',
+      'ultimaAtualizacao': ultimaAtualizacao,
+    });
   });
 }

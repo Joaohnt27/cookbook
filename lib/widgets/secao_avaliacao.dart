@@ -35,6 +35,7 @@ class _SecaoAvaliacaoState extends State<SecaoAvaliacao> {
             .update(dados);
       }
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Avaliação salva!"),
@@ -42,6 +43,7 @@ class _SecaoAvaliacaoState extends State<SecaoAvaliacao> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Erro: $e"), backgroundColor: Colors.red),
       );

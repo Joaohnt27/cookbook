@@ -90,12 +90,14 @@ class _PesquisaReceitasPageState extends State<PesquisaReceitasPage> {
                   .where('userId', isEqualTo: user?.uid)
                   .snapshots(),
               builder: (context, snapshot) {
-                if (snapshot.hasError)
+                if (snapshot.hasError) {
                   return const Center(child: Text("Erro ao carregar dados"));
-                if (!snapshot.hasData)
+                }
+                if (!snapshot.hasData) {
                   return Center(
                     child: CircularProgressIndicator(color: _primaryColor),
                   );
+                }
 
                 List<Receita> receitas = snapshot.data!.docs
                     .map((doc) => Receita.fromFirestore(doc))
@@ -105,7 +107,18 @@ class _PesquisaReceitasPageState extends State<PesquisaReceitasPage> {
                 if (_ordemAZ) {
                   receitas.sort((a, b) => a.nome.compareTo(b.nome));
                 } else {
-                  receitas.sort((a, b) => b.id.compareTo(a.id));
+                  receitas.sort((a, b) {
+                    final dataA = a.ultimaAtualizacao;
+                    final dataB = b.ultimaAtualizacao;
+
+                    if (dataA == null && dataB == null) {
+                      return b.id.compareTo(a.id);
+                    }
+                    if (dataA == null) return 1;
+                    if (dataB == null) return -1;
+
+                    return dataB.compareTo(dataA);
+                  });
                 }
 
                 if (receitas.isEmpty) {
@@ -141,7 +154,7 @@ class _PesquisaReceitasPageState extends State<PesquisaReceitasPage> {
                       elevation: 1,
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: _primaryColor.withOpacity(0.1),
+                          backgroundColor: _primaryColor.withValues(alpha: 0.1),
                           child: Icon(
                             Icons.restaurant,
                             color: _primaryColor,

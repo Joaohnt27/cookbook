@@ -31,6 +31,7 @@ class _EsqueceuSenhaPageState extends State<EsqueceuSenhaPage> {
     );
 
     setState(() => _carregando = false);
+    if (!mounted) return;
 
     if (erro == null) {
       ScaffoldMessenger.of(context).showSnackBar(

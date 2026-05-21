@@ -8,6 +8,7 @@ class Receita {
   int tempoPreparo;
   String categoria;
   String userId;
+  DateTime? ultimaAtualizacao;
 
   Receita({
     required this.id,
@@ -17,6 +18,7 @@ class Receita {
     required this.tempoPreparo,
     required this.categoria,
     required this.userId,
+    this.ultimaAtualizacao,
   });
 
   // Converte DocumentSnapshot do Firestore para o objeto Receita
@@ -30,6 +32,9 @@ class Receita {
       tempoPreparo: data['tempoPreparo'] ?? 0,
       categoria: data['categoria'] ?? 'Geral',
       userId: data['userId'] ?? '',
+      ultimaAtualizacao: data['ultimaAtualizacao'] is Timestamp
+          ? (data['ultimaAtualizacao'] as Timestamp).toDate()
+          : null,
     );
   }
 
@@ -42,6 +47,7 @@ class Receita {
       'tempoPreparo': tempoPreparo,
       'categoria': categoria,
       'userId': userId,
+      'ultimaAtualizacao': ultimaAtualizacao,
     };
   }
 }

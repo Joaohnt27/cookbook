@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../widgets/telefone_input_formatter.dart';
 
 class PerfilPage extends StatefulWidget {
   const PerfilPage({super.key});
@@ -13,6 +14,7 @@ class _PerfilPageState extends State<PerfilPage> {
   final user = FirebaseAuth.instance.currentUser;
   final _nomeController = TextEditingController();
   final _telefoneController = TextEditingController();
+  final _cidadeController = TextEditingController();
   bool _editando = false;
 
   final Color _primaryColor = const Color(0xFFE67E22);
@@ -26,6 +28,7 @@ class _PerfilPageState extends State<PerfilPage> {
           .update({
             'nome': _nomeController.text,
             'telefone': _telefoneController.text,
+            'cidade': _cidadeController.text,
           });
 
       setState(() => _editando = false);
@@ -153,6 +156,7 @@ class _PerfilPageState extends State<PerfilPage> {
           if (!_editando) {
             _nomeController.text = dados['nome'] ?? '';
             _telefoneController.text = dados['telefone'] ?? '';
+            _cidadeController.text = dados['cidade'] ?? '';
           }
 
           return SingleChildScrollView(
@@ -164,7 +168,7 @@ class _PerfilPageState extends State<PerfilPage> {
                   children: [
                     CircleAvatar(
                       radius: 60,
-                      backgroundColor: _primaryColor.withOpacity(0.1),
+                      backgroundColor: _primaryColor.withValues(alpha: 0.1),
                       child: Icon(Icons.person, size: 70, color: _primaryColor),
                     ),
                     if (!_editando)
@@ -204,6 +208,12 @@ class _PerfilPageState extends State<PerfilPage> {
                     Icons.phone_android_outlined,
                   ),
                   keyboardType: TextInputType.phone,
+                  inputFormatters: [TelefoneInputFormatter()],
+                ),
+                const SizedBox(height: 40),
+                TextField(
+                  controller: _cidadeController,
+                  decoration: _inputStyle("Cidade", Icons.location_city),
                 ),
                 const SizedBox(height: 40),
                 if (_editando)

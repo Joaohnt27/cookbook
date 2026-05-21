@@ -10,6 +10,7 @@ class AuthService {
     required String password,
     required String nome,
     required String telefone,
+    required String cidade,
   }) async {
     try {
       // Cria o usuário no Firebase Auth
@@ -20,6 +21,7 @@ class AuthService {
       await _db.collection('usuarios').doc(userCredential.user!.uid).set({
         'nome': nome,
         'telefone': telefone,
+        'cidade': cidade,
         'email': email,
         'data_cadastro': FieldValue.serverTimestamp(),
       });
