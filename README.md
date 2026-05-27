@@ -128,18 +128,28 @@ lib/
 
 1. Instale o Flutter SDK e configure um emulador ou dispositivo físico.
 2. Clone este repositório.
+
+```bash
+git clone https://github.com/Joaohnt27/cookbook.git
+```
 3. Instale as dependências:
 
 ```bash
 flutter pub get
 ```
 
-4. Confira se os arquivos de configuração do Firebase estão presentes:
+4. Entrar na Pasta:
+
+```bash
+cd cookbook
+```
+
+5. Confira se os arquivos de configuração do Firebase estão presentes:
 
 - `lib/firebase_options.dart`
 - `android/app/google-services.json`
 
-5. Execute o aplicativo:
+6. Execute o aplicativo:
 
 ```bash
 flutter run
